@@ -2,7 +2,10 @@ import streamlit as st
 import nest_asyncio
 
 # Applying asyncio loops in Streamlit
-nest_asyncio.apply()
+try:
+    nest_asyncio.apply()
+except ValueError as _:
+    pass
 
 from src.models.llm import init_models
 from src.database.vector_store import get_vector_index
