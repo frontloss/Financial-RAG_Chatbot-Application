@@ -1,0 +1,15 @@
+langchain-core>=0.3.0
+langchain-openai>=0.2.0
+langgraph>=0.2.0
+llama-index-core>=0.12.0
+llama-index-vector-stores-chroma
+llama-index-embeddings-huggingface
+chromadb>=0.5.0
+nest_asyncio
+python-dotenv
+pydantic>=2.0
+llama-index-llms-ollama
+llama-parse
+langchain-ollama
+streamlit
+langchain-groq
