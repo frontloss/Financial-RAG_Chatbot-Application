@@ -8,11 +8,11 @@ def get_financial_tools(index):
     query_engine = index.as_query_engine(similarity_top_k=5)
     
     # Wrap LlamaIndex engine as a callable for LangGraph
-    # @tool("financial_data_retriever")
-    # def financial_data_retriever(query: str):
-    #     """Useful for retrieving specific financial data, report excerpts, or quantitative metrics from the vector store."""
-    #     response = query_engine.query(query)
-    #     return str(response)
+    @tool("financial_data_retriever")
+    def financial_data_retriever(query: str):
+        """Useful for retrieving specific financial data, report excerpts, or quantitative metrics from the vector store."""
+        response = query_engine.query(query)
+        return str(response)
 
     @tool("calculator_tool")
     def calculator_tool(expression: str):
@@ -33,4 +33,4 @@ def get_financial_tools(index):
             logger.error("Error calculating {0}: {1}".format(expression,e))
             return "Error calculating {0}: {1}".format(expression,e)
         
-    return [calculator_tool]
+    return [financial_data_retriever,calculator_tool]

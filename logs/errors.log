@@ -1,0 +1,4 @@
+2026-01-20 11:44:17,843 [ERROR] src.agents.nodes (nodes.py:59): Error executing financial_data_retriever:timed out
+2026-01-20 11:44:49,993 [ERROR] src.agents.nodes (nodes.py:59): Error executing financial_data_retriever:timed out
+2026-01-20 11:45:22,063 [ERROR] src.agents.nodes (nodes.py:59): Error executing financial_data_retriever:timed out
+2026-01-20 11:45:54,152 [ERROR] src.agents.nodes (nodes.py:59): Error executing financial_data_retriever:timed out

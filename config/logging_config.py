@@ -1,4 +1,5 @@
 import os
+import sys  # <--- Import sys
 import logging.config
 from pathlib import Path
 
@@ -24,14 +25,17 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "class": "logging.StreamHandler",
             "formatter": "standard",
+            # StreamHandler uses sys.stderr by default. 
+            # We fix its encoding in the setup_logging() function below.
         },
         "file": {
             "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(LOG_DIR, "app.log"),
-            "maxBytes": 5 * 1024 * 1024,  # 5 MB
-            "backupCount": 3,  # Keep last 3 files
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 3,
             "formatter": "verbose",
+            "encoding": "utf-8",  # <--- ADDED: Prevents crash when saving symbols like ₹
         },
         "error_file": {
             "level": "ERROR",
@@ -40,6 +44,7 @@ LOGGING_CONFIG = {
             "maxBytes": 5 * 1024 * 1024,
             "backupCount": 3,
             "formatter": "verbose",
+            "encoding": "utf-8",  # <--- ADDED: Prevents crash when saving symbols like ₹
         },
     },
     "loggers": {
@@ -48,7 +53,12 @@ LOGGING_CONFIG = {
             "level": "DEBUG",
             "propagate": True,
         },
-        "httpx": {  # Silence noisy libraries (optional)
+        "httpx": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "httpcore": { 
             "handlers": ["console"],
             "level": "WARNING",
             "propagate": False,
@@ -57,4 +67,14 @@ LOGGING_CONFIG = {
 }
 
 def setup_logging():
+    # 1. Fix the Console Encoding (Windows specific fix)
+    # This prevents the "charmap codec" error when printing '₹' to the terminal
+    if sys.platform == "win32":
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+            sys.stderr.reconfigure(encoding='utf-8')
+        except Exception:
+            pass  # Fallback if reconfigure is not available (rare)
+
+    # 2. Apply the Config
     logging.config.dictConfig(LOGGING_CONFIG)
