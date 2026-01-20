@@ -1,5 +1,5 @@
 import os
-import sys  # <--- Import sys
+import sys
 import logging.config
 from pathlib import Path
 
@@ -25,8 +25,6 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "class": "logging.StreamHandler",
             "formatter": "standard",
-            # StreamHandler uses sys.stderr by default. 
-            # We fix its encoding in the setup_logging() function below.
         },
         "file": {
             "level": "DEBUG",
@@ -35,7 +33,7 @@ LOGGING_CONFIG = {
             "maxBytes": 5 * 1024 * 1024,
             "backupCount": 3,
             "formatter": "verbose",
-            "encoding": "utf-8",  # <--- ADDED: Prevents crash when saving symbols like ₹
+            "encoding": "utf-8",  
         },
         "error_file": {
             "level": "ERROR",
@@ -44,11 +42,11 @@ LOGGING_CONFIG = {
             "maxBytes": 5 * 1024 * 1024,
             "backupCount": 3,
             "formatter": "verbose",
-            "encoding": "utf-8",  # <--- ADDED: Prevents crash when saving symbols like ₹
+            "encoding": "utf-8", 
         },
     },
     "loggers": {
-        "": {  # Root logger
+        "": { 
             "handlers": ["console", "file", "error_file"],
             "level": "DEBUG",
             "propagate": True,
@@ -67,14 +65,10 @@ LOGGING_CONFIG = {
 }
 
 def setup_logging():
-    # 1. Fix the Console Encoding (Windows specific fix)
-    # This prevents the "charmap codec" error when printing '₹' to the terminal
     if sys.platform == "win32":
         try:
             sys.stdout.reconfigure(encoding='utf-8')
             sys.stderr.reconfigure(encoding='utf-8')
         except Exception:
-            pass  # Fallback if reconfigure is not available (rare)
-
-    # 2. Apply the Config
+            pass  
     logging.config.dictConfig(LOGGING_CONFIG)
