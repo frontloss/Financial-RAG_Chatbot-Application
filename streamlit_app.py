@@ -22,7 +22,7 @@ st.set_page_config(
 )
 
 st.title("AI Financial Analyst")
-st.markdown("**Powered by Llama 3.2, LangGraph & LlamaIndex.**")
+st.markdown("**Powered by Llama-3.1-8b-instant (Groq), LangGraph & LlamaIndex.**")
 st.markdown("""
 This chatbot can help you research financial reports, perform calculations, and generate insights.
 """)
@@ -30,7 +30,7 @@ This chatbot can help you research financial reports, perform calculations, and 
 # SIDEBAR: Model Details
 with st.sidebar:
     st.markdown("### Model Details")
-    st.info("Embedding: BAAI/bge-m3\nLLM: Llama 3.2 (3B)")
+    st.info("Embedding: sentence-transformers/all-MiniLM-L6-v2 \nLLM: Llama-3.1-8b-instant (Groq)")
 
 @st.cache_resource(show_spinner="Loading AI Models & Database...")
 def initialize_agent():
