@@ -11,8 +11,8 @@ class Settings:
     DB_PATH = os.getenv("DB_PATH",str(BASE_DIR/"chroma_db"))
 
     #Models
-    LLM_MODEL = "llama3.2"
-    EMBED_MODEL = "BAAI/bge-m3"
+    LLM_MODEL = "llama3.2:3b"
+    EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
     LLM_TIMEOUT = 600
     LLM_TEMPERATURE = 0
 

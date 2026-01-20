@@ -13,3 +13,4 @@ llama-parse
 langchain-ollama
 streamlit
 langchain-groq
+langchain-community
