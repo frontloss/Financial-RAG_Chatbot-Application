@@ -1,5 +1,6 @@
 import argparse
 import nest_asyncio
+import asyncio
 from config.logging_config import setup_logging
 import logging
 
@@ -24,7 +25,7 @@ def ingest_data():
     get_vector_index(nodes=nodes) # Index and Persist
     logger.info("Ingestion complete. Index saved.")
 
-def run_agent(query: str):
+async def run_agent(query: str):
     """Run the agentic chatbot."""
     # 1. Init Models & DB
     logger.info("Initializing models and database...")
@@ -44,12 +45,9 @@ def run_agent(query: str):
         "messages": []
     }
     
-    result = app.invoke(inputs)
+    result = await app.ainvoke(inputs)
     final_answer = result['messages'][-1].content
     
-    print("\n" + "="*50)
-    print("FINAL GENERATED REPORT")
-    print("="*50 + "\n")
     print(final_answer)
 
 if __name__ == "__main__":
@@ -62,8 +60,8 @@ if __name__ == "__main__":
     if args.ingest:
         ingest_data()
     elif args.query:
-        run_agent(args.query)
+        asyncio.run(run_agent(args.query))
     else:
         # Default behavior if no args (useful for interactive debugging)
         query = input("Enter your financial query: ")
-        run_agent(query)
+        asyncio.run(run_agent(query))
