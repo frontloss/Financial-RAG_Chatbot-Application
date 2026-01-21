@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph, END
 from src.agents.nodes import AgentNodes
 from src.agents.state import AgentState
-from src.agents.router import route_query_ai
+
 def build_graph(llm, tools):
     nodes = AgentNodes(llm, tools)
     workflow = StateGraph(AgentState)

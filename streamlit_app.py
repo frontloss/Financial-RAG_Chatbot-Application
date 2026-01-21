@@ -22,7 +22,7 @@ st.set_page_config(
 )
 
 st.title("AI Financial Analyst")
-st.markdown("**Powered by Llama-3.1-8b-instant (Groq), LangGraph & LlamaIndex.**")
+st.markdown("**Powered by Llama-3.3-70b (Groq), LangGraph & LlamaIndex.**")
 st.markdown("""
 This chatbot can help you research financial reports, perform calculations, and generate insights.
 """)

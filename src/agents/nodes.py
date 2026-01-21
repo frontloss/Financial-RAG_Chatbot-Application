@@ -72,8 +72,8 @@ class AgentNodes:
         prompt = """
             User Query: {0}\n\n
             Gathered Insights:\n{1}\n\n
-            Generate a professional, comprehensive response answering the query based on the insights above in no more than 100 words.
-            Cite the specific data points used. Do not include any plan steps used while generating the response. Avoid duplication of insights in the reponse. """.format(query,insights)
+            Generate a professional, comprehensive report answering the query based on the insights.
+            Cite the specific data points used. Do not include any plan steps used while generating the report. Avoid duplication of insights in the reponse. """.format(query,insights)
         
         response = self.llm.invoke(prompt)
         return {"messages": [response]}
