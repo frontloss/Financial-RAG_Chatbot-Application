@@ -28,7 +28,7 @@ def get_financial_tools(index):
             # Provide a specific error to help the Agent self-correct
             return f"Error: You used a variable name '{e.name}' which is not defined. Please perform the calculation using explicit numbers only (e.g. '25.5 + 10')."
         except SyntaxError:
-            return f"Error: Invalid syntax in expression '{expression}'. Check for missing parentheses or operators."
+            return f"Error: Invalid syntax in expression '{expression}'. Please perform the calculation using explicit numbers only (e.g. '25.5 + 10'). Also Check for missing parentheses or operators."
         except Exception as e:
             logger.error("Error calculating {0}: {1}".format(expression,e))
             return "Error calculating {0}: {1}".format(expression,e)
