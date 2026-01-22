@@ -3,6 +3,7 @@ import nest_asyncio
 import asyncio
 from config.logging_config import setup_logging
 import logging
+import re
 
 # Setup Logging immediately
 setup_logging()
@@ -47,8 +48,10 @@ async def run_agent(query: str):
     
     result = await app.ainvoke(inputs)
     final_answer = result['messages'][-1].content
-    
     print(final_answer)
+    print("\n\n")
+    print("Retrieved Sources:")
+    print(result["answer"][0])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Financial RAG Chatbot")

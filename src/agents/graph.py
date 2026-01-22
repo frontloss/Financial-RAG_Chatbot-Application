@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph, END
 from src.agents.nodes import AgentNodes
 from src.agents.state import AgentState
-
+    
 def build_graph(llm, tools):
     nodes = AgentNodes(llm, tools)
     workflow = StateGraph(AgentState)
@@ -10,11 +10,13 @@ def build_graph(llm, tools):
     workflow.add_node("planner", nodes.planner_node)
     workflow.add_node("researcher", nodes.research_node)
     workflow.add_node("synthesizer", nodes.synthesizer_node)
-
-    # Define Edges
+    
+    #Entry Point
     workflow.set_entry_point("planner")
+    
+    # Define Edges
     workflow.add_edge("planner", "researcher")
     workflow.add_edge("researcher", "synthesizer")
     workflow.add_edge("synthesizer", END)
-
+    
     return workflow.compile()

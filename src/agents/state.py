@@ -6,3 +6,5 @@ class AgentState(TypedDict):
     plan: List[str]
     insights: Annotated[List[str], operator.add]
     messages: Annotated[List[Any], operator.add]
+    sources: Annotated[List[str], operator.add]
+    answer: Annotated[List[str], operator.add]

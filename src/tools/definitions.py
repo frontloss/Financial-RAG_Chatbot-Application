@@ -1,36 +1,74 @@
 from langchain_core.tools import tool
 import logging
+from llama_index.core.retrievers import VectorIndexRetriever
+from llama_index.core.postprocessor import SentenceTransformerRerank
+from llama_index.core.query_engine import RetrieverQueryEngine
+import json
+import re
 
 logger = logging.getLogger(__name__)
 
 def get_financial_tools(index):
     """Creates the tool set with access to the specific VectorIndex."""
-    query_engine = index.as_query_engine(similarity_top_k=5)
+    # Enable Hybrid Search (Vector + Keyword)
+    # alpha=0.7 means 70% Vector, 30% Keyword importance    
+    retriever = VectorIndexRetriever(
+        index=index,
+        similarity_top_k=20,
+        vector_store_query_mode="hybrid", 
+        alpha=0.7, 
+    )
+    # CROSSENCODER RERANKING 
+    # Filter from top 20 semantically relevant chunks down to top 5 absolute best chunks
+    reranker = SentenceTransformerRerank(
+        model="cross-encoder/ms-marco-MiniLM-L-6-v2",
+        top_n=5)
+
+    query_engine = RetrieverQueryEngine.from_args(
+        retriever=retriever,
+        node_postprocessors=[reranker]
+    )
     
-    # Wrap LlamaIndex engine as a callable for LangGraph
     @tool("financial_data_retriever")
     def financial_data_retriever(query: str):
-        """Useful for retrieving specific financial data, report excerpts, or quantitative metrics from the vector store."""
+        """
+        Fetches financial data with source citations.
+        Returns JSON with 'answer' and 'sources'.
+        """
+    
         response = query_engine.query(query)
-        return str(response)
-
+        
+        sources = [
+            f"Content: {n.node.get_content()[:500]}" 
+            for n in response.source_nodes
+        ]
+        
+        return json.dumps({
+            "answer": str(response),
+            "sources": sources
+        })
+            
     @tool("calculator_tool")
     def calculator_tool(expression: str):
         """
-        Useful for performing mathematical calculations. 
-        Input must be a string containing numbers and operators (e.g., "(10 + 5) * 0.2").
-        DO NOT use variable names.
+        Evaluates math. REJECTS text or variables.
+        Example Valid: '25.5 + 10'
+        Example Invalid: 'revenue + 10'
         """
         try:
-            allowed_names = {"sum": sum, "min": min, "max": max, "abs": abs, "round": round}
-            return eval(expression,{"__builtins__":{}},allowed_names)
-        except NameError as e:
-            # Provide a specific error to help the Agent self-correct
-            return f"Error: You used a variable name '{e.name}' which is not defined. Please perform the calculation using explicit numbers only (e.g. '25.5 + 10')."
-        except SyntaxError:
-            return f"Error: Invalid syntax in expression '{expression}'. Please perform the calculation using explicit numbers only (e.g. '25.5 + 10'). Also Check for missing parentheses or operators."
+            # If the expression contains letters (a-z), it's trying to use variables. Reject it.
+            if re.search(r'[a-zA-Z]', expression):
+                return (
+                    "Error: You passed text/variables to the calculator. "
+                    "It ONLY accepts numbers (e.g., '100 - 50'). "
+                    "Please use 'financial_data_retriever' to get the actual numbers first."
+                )
+
+            # Safe eval
+            return eval(expression, {"__builtins__": None}, {})
+            
         except Exception as e:
-            logger.error("Error calculating {0}: {1}".format(expression,e))
-            return "Error calculating {0}: {1}".format(expression,e)
+            return f"Math Error: {e}"
         
     return [financial_data_retriever,calculator_tool]
+

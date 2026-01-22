@@ -1,7 +1,9 @@
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage,SystemMessage,AIMessage
 from src.agents.state import AgentState
 import logging
 import asyncio
+import re
+
 logger = logging.getLogger(__name__)
 
 class AgentNodes:
@@ -41,39 +43,45 @@ class AgentNodes:
         
         msg = await self.llm_with_tools.ainvoke(prompt)
         tool_outputs = []
+        collected_sources = []
         self.tool_map = {t.name: t for t in self.tools}
         if msg.tool_calls:
-            # 4. Parallel Execution Loop
-            tasks = []
-            for tool_call in msg.tool_calls:
-                func_name = tool_call['name']
-                args = tool_call['args']
-                
-                if "query" in args and isinstance(args["query"], dict):
-                     # Fallback to the specific plan step if possible, or generic query
-                     args["query"] = str(plan_str) 
-
-                if func_name in self.tool_map:
-                    # Queue the tool execution (don't await yet)
-                    tasks.append(self.tool_map[func_name].ainvoke(args))
-            
-            # Fire all tools at once (Wait for longest one only)
+            # Parallel Execution Loop
+            # Queue the tools execution before calling await on the tasks.
+            tasks = [self.tool_map[tool_call["name"]].ainvoke(tool_call["args"]) for tool_call in msg.tool_calls]
             results = await asyncio.gather(*tasks, return_exceptions=True)
             for res in results:
-                tool_outputs.append(str(res))
+                try:
+                    data = json.loads(str(res))
+                    if isinstance(data, dict) and "sources" in data:
+                        tool_outputs.append(f"Data: {data['answer']}")
+                        collected_sources.extend(data["sources"])
+                    else:
+                        tool_outputs.append(str(res))
+                except:
+                    tool_outputs.append(str(res))
 
-        return {"insights": tool_outputs}
+        return {"answer": tool_outputs,"sources":collected_sources}
 
     def synthesizer_node(self, state: AgentState):
-        """The Writer: Compiles everything into a final response."""
+        """The Writer: Compiles everything into a final report."""
         query = state["user_query"]
         insights = "\n".join(state["insights"])
-        
-        prompt = """
-            User Query: {0}\n\n
-            Gathered Insights:\n{1}\n\n
-            Generate a professional, comprehensive report answering the query based on the insights.
-            Cite the specific data points used. Do not include any plan steps used while generating the report. Avoid duplication of insights in the reponse. """.format(query,insights)
-        
-        response = self.llm.invoke(prompt)
+        system_prompt = (
+            "You are a Senior Financial Analyst at a top-tier investment firm. "
+            "Your clients expect rigor, precision, and data-backed insights.\n\n"
+            "STRUCTURE YOUR REPORT AS FOLLOWS:\n"
+            "1. **Executive Summary**: A 2-sentence bottom line.\n"
+            "2. **Key Financials Table**: Compare metrics (Revenue, Margins, YoY Growth) in a Markdown table.\n"
+            "3. **Analysis**: Explain *why* the numbers changed (Drivers & Risks).\n"
+            "4. **Sources**: List the specific documents used.\n\n"
+            "RULES:\n"
+            "- speak in a professional, objective tone.\n"
+            "- If data is missing, say 'Data not disclosed' instead of guessing.\n"
+        )
+        user_prompt = f"Query: {query}\n\nData gathered:\n{insights}\n\nWrite the report."
+        response = self.llm.invoke([
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=user_prompt)
+        ])
         return {"messages": [response]}
