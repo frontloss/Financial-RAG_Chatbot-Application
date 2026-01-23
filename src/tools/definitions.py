@@ -64,8 +64,7 @@ def get_financial_tools(index):
                     "Please use 'financial_data_retriever' to get the actual numbers first."
                 )
 
-            # Safe eval
-            return eval(expression, {"__builtins__": None}, {})
+            return eval(expression)
             
         except Exception as e:
             return f"Math Error: {e}"
