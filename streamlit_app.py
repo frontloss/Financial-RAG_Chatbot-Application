@@ -13,7 +13,7 @@ from src.tools.definitions import get_financial_tools
 from src.agents.graph import build_graph
 
 st.set_page_config(page_title="AI Financial Analyst", layout="wide")
-st.title("AI Financial Analyst 🕵️‍♂️")
+st.title("AI Financial Analyst ")
 
 @st.cache_resource
 def initialize_agent():
@@ -25,12 +25,12 @@ def initialize_agent():
 app = initialize_agent()
 
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "assistant", "content": "Ask me about TCS or Infosys."}]
+    st.session_state["messages"] = [{"role": "assistant", "content": "Ask me about finance related to TCS, Infosys and Microsoft"}]
 
 for msg in st.session_state["messages"]:
     st.chat_message(msg["role"]).write(msg["content"])
     if "sources" in msg and msg["sources"]:
-        with st.expander("📚 Evidence (Source Docs)"):
+        with st.expander(" Evidence (Source Docs)"):
             for s in msg["sources"]:
                 st.info(s)
 
@@ -60,12 +60,6 @@ async def process_query(prompt, app_instance, status_container, placeholder):
             final_msg = event["synthesizer"]["messages"][-1]
             full_response = final_msg.content
             placeholder.markdown(full_response)
-        
-        if "grader" in event:
-            # Append validation message to the output
-            final_msg = event["grader"]["messages"][-1]
-            full_response += final_msg.content
-            placeholder.markdown(full_response)
 
     return full_response, collected_sources
 
@@ -83,7 +77,7 @@ if prompt := st.chat_input("Ex: Compare TCS and Infosys Net Profit"):
             status.update(label="Complete", state="complete", expanded=False)
             
             if sources:
-                with st.expander("🔍 View Authentic Sources (Evidence)"):
+                with st.expander("View Authentic Sources (Evidence)"):
                     for s in sources:
                         st.info(s)
             

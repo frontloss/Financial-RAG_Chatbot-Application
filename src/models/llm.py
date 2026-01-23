@@ -13,7 +13,7 @@ def init_models():
     if not api_key:
         raise ValueError("GROQ_API_KEY not found in .env file!")
     local_embed_model = HuggingFaceEmbedding(model_name = settings.EMBED_MODEL,device="cpu")
-    local_llm = Groq(model="llama-3.1-8b-instant",temperature=settings.LLM_TEMPERATURE,api_key=api_key)
+    local_llm = Groq(model=settings.LLM_MODEL,temperature=settings.LLM_TEMPERATURE,api_key=api_key)
     LlamaSettings.embed_model = local_embed_model
     LlamaSettings.llm = local_llm
     lc_chat_model = ChatGroq(model="llama-3.1-8b-instant",temperature=settings.LLM_TEMPERATURE,api_key = api_key)

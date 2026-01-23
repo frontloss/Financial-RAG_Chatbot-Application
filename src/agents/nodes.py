@@ -67,18 +67,18 @@ class AgentNodes:
         """The Writer: Compiles everything into a final report."""
         query = state["user_query"]
         insights = "\n".join(state["insights"])
-        system_prompt = (
-            "You are a Senior Financial Analyst at a top-tier investment firm. "
-            "Your clients expect rigor, precision, and data-backed insights.\n\n"
-            "STRUCTURE YOUR REPORT AS FOLLOWS:\n"
-            "1. **Executive Summary**: A 2-sentence bottom line.\n"
-            "2. **Key Financials Table**: Compare metrics (Revenue, Margins, YoY Growth) in a Markdown table.\n"
-            "3. **Analysis**: Explain *why* the numbers changed (Drivers & Risks).\n"
-            "4. **Sources**: List the specific documents used.\n\n"
-            "RULES:\n"
-            "- speak in a professional, objective tone.\n"
-            "- If data is missing, say 'Data not disclosed' instead of guessing.\n"
-        )
+        system_prompt = """You are a Senior Financial Analyst at a top-tier investment firm.\n
+            Your clients expect rigor, precision, and data-backed insights.\n\n
+            STRUCTURE YOUR REPORT AS FOLLOWS:\n
+            1. **Executive Summary**: A 2-sentence bottom line.\n
+            2. **Key Financials Table**: Compare metrics (Revenue, Margins, YoY Growth) in a Markdown table.\n"
+            3. **Analysis**: Explain *why* the numbers changed (Drivers & Risks).\n"
+            4. **Sources**: List the specific documents used.\n\n
+            RULES:\n
+            - speak in a professional, objective tone.\n
+            - If data is missing, say 'Data not disclosed' instead of guessing.\n
+            - Return Key Financials Table only if user asks queries related to financial metrics otherwise please ignore it.\n"""
+        
         user_prompt = f"Query: {query}\n\nData gathered:\n{insights}\n\nWrite the report."
         response = self.llm.invoke([
             SystemMessage(content=system_prompt),
